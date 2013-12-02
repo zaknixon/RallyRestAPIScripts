@@ -1,0 +1,38 @@
+require 'rally_rest_api'
+
+# Fill out the URL, username and password of your Rally instance.
+rally = RallyRestAPI.new(:base_url =>"",
+                          :username => "",
+                          :password => "",
+                          :version => '1.30')
+
+#List of generic tasks that need to be added, along with their estimated number of hours.
+generic_tasks = [ {:name => "Critical Design Review", :est_hours=> 2,:description =>"Review of the low level design of the story."},
+                  {:name => "Update Designs (if necessary)", :est_hours=> 2,:description =>"Update design diagrams and documentation if the design has changed dramatically during implementation."},
+                  {:name => "Create/Update Unit Tests", :est_hours=> 2,:description =>"Test you code!"},
+                  {:name => "Peer Code Review", :est_hours=>1 ,:description =>"Get some fellow developers review and criticize your code."},
+                  {:name => "Feature Review", :est_hours=> 1,:description =>"Final review of the feature with the customer, product leads, HCD and test team."}]
+
+#Creating the list of stories that need to be modified
+@stories = ["S7776","S3844","S7980","S7974","S7897","S7988","S7985","S7983"]
+
+ @stories.each do |story_id| 
+
+  results = rally.find(:hierarchicalrequirement) { contains :formatted_id, story_id}
+ 
+   results.each do |requirement|
+     puts requirement
+     
+     generic_tasks.each do |task|
+       puts task
+       create_story = rally.create(:task,
+                                   :name=>task[:name],
+                                   :work_product => requirement, 
+       							               :estimate => task[:est_hours],
+                                   :description => task[:description])	
+     end
+     
+     
+   end
+
+ end
